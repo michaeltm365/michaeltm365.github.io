@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Project 1: Colorizing the Prokudin-Gorskii Collection</title>
+<style>
+    :root {
+        --bg: #f7f5f2;
+        --panel: #ffffff;
+        --ink: #1c1b19;
+        --muted: #6b6864;
+        --rule: #e2ded8;
+        --accent: #b4451f;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+        margin: 0;
+        padding: 0 24px 96px;
+        background: var(--bg);
+        color: var(--ink);
+        font: 17px/1.65 "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    header, main { max-width: 900px; margin: 0 auto; }
+
+    header {
+        padding: 72px 0 40px;
+        border-bottom: 1px solid var(--rule);
+        margin-bottom: 56px;
+    }
+
+    .eyebrow {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        letter-spacing: .18em;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin: 0 0 14px;
+    }
+
+    h1 {
+        font-size: clamp(32px, 6vw, 52px);
+        line-height: 1.1;
+        font-weight: 600;
+        letter-spacing: -.02em;
+        margin: 0;
+    }
+
+    .standfirst {
+        color: var(--muted);
+        font-size: 19px;
+        margin: 22px 0 0;
+        max-width: 640px;
+    }
+
+    .back {
+        display: inline-block;
+        margin-top: 28px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 13px;
+        color: var(--muted);
+        text-decoration: none;
+        border-bottom: 1px solid var(--rule);
+        padding-bottom: 2px;
+    }
+    .back:hover { color: var(--accent); border-color: var(--accent); }
+
+    section { margin-bottom: 72px; }
+
+    h2 {
+        font-size: 27px;
+        font-weight: 600;
+        letter-spacing: -.01em;
+        margin: 0 0 20px;
+    }
+
+    h2 .num {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 14px;
+        color: var(--accent);
+        margin-right: 12px;
+        vertical-align: 3px;
+    }
+
+    h3 {
+        font-size: 19px;
+        font-weight: 600;
+        margin: 40px 0 14px;
+    }
+
+    p { margin: 0 0 18px; }
+
+    a { color: var(--accent); }
+
+    code {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: .86em;
+        background: #ece8e2;
+        padding: 1px 5px;
+        border-radius: 4px;
+    }
+
+    pre {
+        background: var(--panel);
+        border: 1px solid var(--rule);
+        border-radius: 8px;
+        padding: 16px 18px;
+        overflow-x: auto;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 13.5px;
+        line-height: 1.6;
+    }
+    pre code { background: none; padding: 0; font-size: inherit; }
+
+    .pair {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        margin-top: 28px;
+    }
+
+    .trio {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        margin-top: 28px;
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        margin-top: 28px;
+    }
+
+    figure {
+        margin: 0;
+        background: var(--panel);
+        padding: 12px;
+        border: 1px solid var(--rule);
+        border-radius: 10px;
+        box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.05);
+    }
+
+    figure img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 5px;
+        background: #eceae6;
+    }
+
+    figcaption {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11.5px;
+        line-height: 1.5;
+        color: var(--muted);
+        margin-top: 10px;
+        letter-spacing: .01em;
+    }
+    figcaption b { color: var(--ink); font-weight: 600; }
+
+    .solo { max-width: 620px; margin: 28px auto 0; }
+    .plate { max-width: 300px; margin: 0; }
+
+    .side {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 32px;
+        align-items: start;
+        margin-top: 28px;
+    }
+
+    .tablewrap { overflow-x: auto; margin-top: 28px; }
+
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 13px;
+        background: var(--panel);
+        border: 1px solid var(--rule);
+        border-radius: 10px;
+    }
+
+    th, td {
+        text-align: left;
+        padding: 9px 14px;
+        border-bottom: 1px solid var(--rule);
+        white-space: nowrap;
+    }
+    th {
+        font-size: 11px;
+        letter-spacing: .1em;
+        text-transform: uppercase;
+        color: var(--muted);
+        font-weight: 600;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    td.name { font-family: inherit; font-size: 15px; }
+    tr.fail td { background: #fbf1ec; }
+    tr.fail td.name { color: var(--accent); }
+
+    .note {
+        border-left: 3px solid var(--accent);
+        padding: 2px 0 2px 18px;
+        color: var(--muted);
+        margin: 28px 0;
+    }
+
+
+
+    .printonly { display: none; }
+
+    @media print {
+        body { padding: 0 12px 0; font-size: 12px; background: #fff; }
+        header { padding-top: 12px; }
+        section { margin-bottom: 26px; }
+        h2 { page-break-after: avoid; }
+        h3 { page-break-after: avoid; }
+        table { page-break-inside: avoid; }
+        figure { box-shadow: none; page-break-inside: avoid; }
+        .back { display: none; }
+        .printonly {
+            display: block;
+            font-family: ui-monospace, "SF Mono", Menlo, monospace;
+            font-size: 11px;
+            color: #6b6864;
+            margin-top: 14px;
+        }
+    }
+
+    @media (max-width: 720px) {
+        .pair, .trio, .grid { grid-template-columns: 1fr; }
+        .side { grid-template-columns: 1fr; }
+        header { padding-top: 48px; }
+    }
+</style>
+</head>
+<body>
+
+<header>
+    <p class="eyebrow">CS 180 &middot; Project 1</p>
+    <h1>Images of the<br>Russian Empire</h1>
+    <p class="standfirst">Aligning Prokudin-Gorskii's three-exposure glass plate negatives into color photographs.</p>
+    <a class="back" href="../index.html">&larr; back to portfolio</a>
+    <p class="printonly">Live version: https://michaeltm365.github.io/1/ &mdash; this PDF is a print of that page.</p>
+</header>
+
+<main>
+
+<section>
+    <h2><span class="num">01</span>The problem</h2>
+
+    <p>Prokudin-Gorskii photographed each scene three times in succession onto one tall glass plate &mdash; once through a blue filter, once green, once red. The Library of Congress scanned the plates as single grayscale images with the three exposures stacked <b>BGR</b> top to bottom.</p>
+
+    <p>Splitting the scan into thirds and stacking them gives a badly fringed image, because the exposures do not line up. The plate advanced between shots, and cutting at exactly one third of the height is only a guess &mdash; <code>cathedral.jpg</code> is 1024 pixels tall, which is not divisible by three.</p>
+
+    <div class="side">
+        <figure class="plate">
+            <img src="media/cathedral_plate.jpg" alt="The raw cathedral.jpg glass plate scan">
+            <figcaption><b>The raw scan.</b> Three exposures stacked B / G / R.</figcaption>
+        </figure>
+        <div>
+            <div class="trio" style="margin-top:0">
+                <figure><img src="media/cathedral_ch_b.jpg" alt="Blue channel"><figcaption><b>B</b> &mdash; anchor</figcaption></figure>
+                <figure><img src="media/cathedral_ch_g.jpg" alt="Green channel"><figcaption><b>G</b></figcaption></figure>
+                <figure><img src="media/cathedral_ch_r.jpg" alt="Red channel"><figcaption><b>R</b></figcaption></figure>
+            </div>
+            <p style="margin-top:22px">The job: find the <code>(x, y)</code> translation bringing G onto B, and another bringing R onto B. B stays fixed as the anchor.</p>
+        </div>
+    </div>
+</section>
+
+<section>
+    <h2><span class="num">02</span>Single-scale alignment</h2>
+
+    <p>Exhaustive search over every integer displacement in a <code>[-15, 15]</code> window &mdash; 961 candidates &mdash; scored by <b>L2 / Euclidean distance</b>, implemented as mean squared error:</p>
+
+    <pre><code>metric = lambda x, y: np.mean((x - y) ** 2)</code></pre>
+
+    <p>The mean has the same argmin as <code>sqrt(sum(...))</code> and keeps the numbers readable at any image size. Shifting is done with <code>np.roll</code> on both axes.</p>
+
+    <p>Scoring the full frame does not work: the plate margins and scan edges are high-contrast and near-identical across channels, so the metric lines up the borders instead of the picture. I crop a fixed interior margin off every channel first &mdash; 30px for JPEGs, 250px for TIFFs.</p>
+
+    <div class="pair">
+        <figure><img src="media/cathedral_unaligned.jpg" alt="Cathedral unaligned"><figcaption><b>Before.</b> Thirds stacked directly.</figcaption></figure>
+        <figure><img src="media/cathedral.jpg" alt="Cathedral aligned"><figcaption><b>After.</b> &plusmn;15 search, L2.</figcaption></figure>
+    </div>
+
+    <div class="trio">
+        <figure><img src="media/cathedral.jpg" alt="cathedral"><figcaption><b>cathedral</b><br>G (2, 5) &middot; R (3, 12)</figcaption></figure>
+        <figure><img src="media/monastery.jpg" alt="monastery"><figcaption><b>monastery</b><br>G (2, &minus;3) &middot; R (2, 3)</figcaption></figure>
+        <figure><img src="media/tobolsk.jpg" alt="tobolsk"><figcaption><b>tobolsk</b><br>G (3, 3) &middot; R (3, 6)</figcaption></figure>
+    </div>
+</section>
+
+<section>
+    <h2><span class="num">03</span>Multi-scale pyramid</h2>
+
+    <p>The TIFFs are ~10&times; wider and the misalignment scales with them: <code>melons</code> needs its red channel moved 179 pixels. Brute force would need ~160,000 candidates per channel over 8-megapixel arrays.</p>
+
+    <p>Instead, recurse down halving the image until a small window covers any plausible displacement, solve there, then on the way back up <b>double the displacement</b> at each level and refine.</p>
+
+    <pre><code>def pyramid_align(anchor, other, ds):
+    if other.shape[0] &lt;= 32 or other.shape[1] &lt;= 32:
+        return align(anchor, other, ds, start=[0, 0])
+
+    if other.shape[0] &gt;= 100 or other.shape[1] &gt;= 100:
+        ds = np.arange(-2, 3)
+
+    anchor_half = sk.transform.rescale(anchor, 0.5, anti_aliasing=True)
+    other_half  = sk.transform.rescale(other,  0.5, anti_aliasing=True)
+
+    _, best_ds_half = pyramid_align(anchor_half, other_half, ds)
+    best_ds_start = [best_ds_half[0] * 2, best_ds_half[1] * 2]
+
+    return align(anchor, other, ds, start=best_ds_start)</code></pre>
+
+    <p>Two things carry the weight. <b>The doubling</b> is the algorithm &mdash; without it each level inherits a displacement in the wrong units and the estimate wanders instead of converging. <b>The window shrinks as the image grows</b>: once the inherited estimate is within a pixel, &plusmn;2 is enough, so each level costs 25 comparisons instead of 961. The full window is only used at the coarsest level.</p>
+
+    <p>The pyramid bottoms out at 32px. Recursing further measures noise, and that noise gets doubled all the way up. Every TIFF finishes in about <b>two seconds</b>; all seventeen run in under half a minute.</p>
+</section>
+
+<section>
+    <h2><span class="num">04</span>Results</h2>
+
+    <p>Displacements are <code>(x, y)</code> relative to the blue channel. (The code reports them as <code>(row, col)</code>, the same pair reversed.)</p>
+
+    <div class="tablewrap">
+    <table>
+        <thead>
+            <tr><th>Image</th><th>Green (x, y)</th><th>Red (x, y)</th><th>Method</th></tr>
+        </thead>
+        <tbody>
+            <tr><td class="name">cathedral</td><td>(2, 5)</td><td>(3, 12)</td><td>single-scale</td></tr>
+            <tr><td class="name">monastery</td><td>(2, &minus;3)</td><td>(2, 3)</td><td>single-scale</td></tr>
+            <tr><td class="name">tobolsk</td><td>(3, 3)</td><td>(3, 6)</td><td>single-scale</td></tr>
+            <tr><td class="name">church</td><td>(4, 25)</td><td>(&minus;4, 58)</td><td>pyramid</td></tr>
+            <tr class="fail"><td class="name">emir</td><td>(24, 49)</td><td>(&minus;492, 149)</td><td>pyramid &mdash; failed</td></tr>
+            <tr><td class="name">harvesters</td><td>(16, 59)</td><td>(13, 124)</td><td>pyramid</td></tr>
+            <tr><td class="name">icon</td><td>(17, 40)</td><td>(23, 89)</td><td>pyramid</td></tr>
+            <tr><td class="name">ilemselga</td><td>(7, 40)</td><td>(11, 130)</td><td>pyramid</td></tr>
+            <tr><td class="name">melons</td><td>(10, 82)</td><td>(13, 179)</td><td>pyramid</td></tr>
+            <tr><td class="name">religous_painting</td><td>(3, 28)</td><td>(7, 68)</td><td>pyramid</td></tr>
+            <tr><td class="name">self_portrait</td><td>(28, 78)</td><td>(37, 176)</td><td>pyramid</td></tr>
+            <tr><td class="name">siren</td><td>(&minus;6, 49)</td><td>(&minus;25, 95)</td><td>pyramid</td></tr>
+            <tr><td class="name">three_generations</td><td>(14, 53)</td><td>(11, 112)</td><td>pyramid</td></tr>
+            <tr><td class="name">wharf</td><td>(&minus;7, 15)</td><td>(&minus;16, 83)</td><td>pyramid</td></tr>
+            <tr><td class="name">custom1</td><td>(33, 40)</td><td>(59, 94)</td><td>pyramid</td></tr>
+            <tr><td class="name">custom2</td><td>(8, &minus;22)</td><td>(10, &minus;33)</td><td>pyramid</td></tr>
+            <tr><td class="name">custom3</td><td>(4, 32)</td><td>(7, 79)</td><td>pyramid</td></tr>
+        </tbody>
+    </table>
+    </div>
+
+    <div class="grid">
+        <figure><img src="media/church.jpg" alt="church"><figcaption><b>church</b><br>G (4, 25) &middot; R (&minus;4, 58)</figcaption></figure>
+        <figure><img src="media/harvesters.jpg" alt="harvesters"><figcaption><b>harvesters</b><br>G (16, 59) &middot; R (13, 124)</figcaption></figure>
+        <figure><img src="media/icon.jpg" alt="icon"><figcaption><b>icon</b><br>G (17, 40) &middot; R (23, 89)</figcaption></figure>
+        <figure><img src="media/ilemselga.jpg" alt="ilemselga"><figcaption><b>ilemselga</b><br>G (7, 40) &middot; R (11, 130)</figcaption></figure>
+        <figure><img src="media/melons.jpg" alt="melons"><figcaption><b>melons</b><br>G (10, 82) &middot; R (13, 179)</figcaption></figure>
+        <figure><img src="media/religous_painting.jpg" alt="religious painting"><figcaption><b>religous_painting</b><br>G (3, 28) &middot; R (7, 68)</figcaption></figure>
+        <figure><img src="media/self_portrait.jpg" alt="self portrait"><figcaption><b>self_portrait</b><br>G (28, 78) &middot; R (37, 176)</figcaption></figure>
+        <figure><img src="media/siren.jpg" alt="siren"><figcaption><b>siren</b><br>G (&minus;6, 49) &middot; R (&minus;25, 95)</figcaption></figure>
+        <figure><img src="media/three_generations.jpg" alt="three generations"><figcaption><b>three_generations</b><br>G (14, 53) &middot; R (11, 112)</figcaption></figure>
+        <figure><img src="media/wharf.jpg" alt="wharf"><figcaption><b>wharf</b><br>G (&minus;7, 15) &middot; R (&minus;16, 83)</figcaption></figure>
+    </div>
+
+    <p style="margin-top:24px">Sixteen of seventeen align without visible defects.</p>
+</section>
+
+<section>
+    <h2><span class="num">05</span>Where it fails</h2>
+
+    <div class="pair">
+        <figure><img src="media/emir_unaligned.jpg" alt="Emir unaligned"><figcaption><b>Before.</b> No alignment.</figcaption></figure>
+        <figure><img src="media/emir.jpg" alt="Emir misaligned after pyramid alignment"><figcaption><b>After.</b> Red shifted 492px sideways.</figcaption></figure>
+    </div>
+
+    <p><code>emir</code> is the one failure. Green aligns correctly at <code>(24, 49)</code>; red ends up at <code>(&minus;492, 149)</code>. As described in the project spec, each image does not have the same brightness values &mdash; so an L2 comparison of raw intensities finds a false minimum.</p>
+</section>
+
+<section>
+    <h2><span class="num">06</span>From the archive</h2>
+
+    <p>Three more plates from the Library of Congress <a href="https://www.loc.gov/collections/prokudin-gorskii/">Prokudin-Gorskii collection</a>, run through the same pipeline with the same fixed parameters.</p>
+
+    <div class="trio">
+        <figure><img src="media/custom1.jpg" alt="custom1"><figcaption><b>custom1</b><br>G (33, 40) &middot; R (59, 94)</figcaption></figure>
+        <figure><img src="media/custom2.jpg" alt="custom2"><figcaption><b>custom2</b><br>G (8, &minus;22) &middot; R (10, &minus;33)</figcaption></figure>
+        <figure><img src="media/custom3.jpg" alt="custom3"><figcaption><b>custom3</b><br>G (4, 32) &middot; R (7, 79)</figcaption></figure>
+    </div>
+
+    <p style="margin-top:24px"><code>custom2</code> has negative offsets in <code>y</code>: its green and red frames sit above where the thirds-split put them. The method assumes no direction, so it makes no difference.</p>
+
+    <div class="pair">
+        <figure><img src="media/custom1_unaligned.jpg" alt="custom1 unaligned"><figcaption><b>Before.</b> custom1, stacked directly.</figcaption></figure>
+        <figure><img src="media/custom1.jpg" alt="custom1 aligned"><figcaption><b>After.</b> Pyramid alignment.</figcaption></figure>
+    </div>
+</section>
+
+
+</main>
+
+</body>
+</html>

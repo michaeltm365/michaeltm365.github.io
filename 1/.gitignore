@@ -1,0 +1,15 @@
+# working notes, not part of the deliverable
+context/
+
+# the assignment says not to host code publicly
+submission/
+
+# inputs and full-resolution outputs: large, and the webpage uses media/ instead
+data/
+output/
+
+# assembled Gradescope submission
+build/
+proj1_submission.zip
+
+.DS_Store
