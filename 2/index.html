@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Project 2: Fun with Filters and Frequencies</title>
+<style>
+    :root {
+        --bg: #f7f5f2;
+        --panel: #ffffff;
+        --ink: #1c1b19;
+        --muted: #6b6864;
+        --rule: #e2ded8;
+        --accent: #b4451f;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+        margin: 0;
+        padding: 0 24px 96px;
+        background: var(--bg);
+        color: var(--ink);
+        font: 17px/1.65 "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    header, main { max-width: 900px; margin: 0 auto; }
+
+    header {
+        padding: 72px 0 40px;
+        border-bottom: 1px solid var(--rule);
+        margin-bottom: 56px;
+    }
+
+    .eyebrow {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        letter-spacing: .18em;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin: 0 0 14px;
+    }
+
+    h1 {
+        font-size: clamp(32px, 6vw, 52px);
+        line-height: 1.1;
+        font-weight: 600;
+        letter-spacing: -.02em;
+        margin: 0;
+    }
+
+    .standfirst {
+        color: var(--muted);
+        font-size: 19px;
+        margin: 22px 0 0;
+        max-width: 640px;
+    }
+
+    .back {
+        display: inline-block;
+        margin-top: 28px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 13px;
+        color: var(--muted);
+        text-decoration: none;
+        border-bottom: 1px solid var(--rule);
+        padding-bottom: 2px;
+    }
+    .back:hover { color: var(--accent); border-color: var(--accent); }
+
+    section { margin-bottom: 72px; }
+
+    h2 {
+        font-size: 27px;
+        font-weight: 600;
+        letter-spacing: -.01em;
+        margin: 0 0 20px;
+    }
+
+    h2 .num {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 14px;
+        color: var(--accent);
+        margin-right: 12px;
+        vertical-align: 3px;
+    }
+
+    h3 {
+        font-size: 19px;
+        font-weight: 600;
+        margin: 40px 0 14px;
+    }
+
+    p { margin: 0 0 18px; }
+
+    a { color: var(--accent); }
+
+    code {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: .86em;
+        background: #ece8e2;
+        padding: 1px 5px;
+        border-radius: 4px;
+    }
+
+    pre {
+        background: var(--panel);
+        border: 1px solid var(--rule);
+        border-radius: 8px;
+        padding: 16px 18px;
+        overflow-x: auto;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 13.5px;
+        line-height: 1.6;
+    }
+    pre code { background: none; padding: 0; font-size: inherit; }
+
+    .pair {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        margin-top: 28px;
+    }
+
+    .trio {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        margin-top: 28px;
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        margin-top: 28px;
+    }
+
+    figure {
+        margin: 0;
+        background: var(--panel);
+        padding: 12px;
+        border: 1px solid var(--rule);
+        border-radius: 10px;
+        box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.05);
+    }
+
+    figure img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 5px;
+        background: #eceae6;
+    }
+
+    figcaption {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11.5px;
+        line-height: 1.5;
+        color: var(--muted);
+        margin-top: 10px;
+        letter-spacing: .01em;
+    }
+    figcaption b { color: var(--ink); font-weight: 600; }
+
+    .solo { max-width: 620px; margin: 28px auto 0; }
+    .wide { margin-top: 28px; }
+    .quote {
+        border-left: 3px solid var(--accent);
+        padding: 4px 0 4px 20px;
+        margin: 26px 0;
+        color: #34322e;
+    }
+    .quote p:last-child { margin-bottom: 0; }
+    .quote .src {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: .1em;
+        text-transform: uppercase;
+        color: var(--muted);
+        display: block;
+        margin-bottom: 10px;
+    }
+    .four { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: 28px; }
+    .kern { display: grid; grid-template-columns: repeat(3, 160px); gap: 20px; margin-top: 28px; justify-content: start; }
+    .kern figure img { image-rendering: pixelated; }
+    .plate { max-width: 300px; margin: 0; }
+
+    .side {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 32px;
+        align-items: start;
+        margin-top: 28px;
+    }
+
+    .tablewrap { overflow-x: auto; margin-top: 28px; }
+
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 13px;
+        background: var(--panel);
+        border: 1px solid var(--rule);
+        border-radius: 10px;
+    }
+
+    th, td {
+        text-align: left;
+        padding: 9px 14px;
+        border-bottom: 1px solid var(--rule);
+        white-space: nowrap;
+    }
+    th {
+        font-size: 11px;
+        letter-spacing: .1em;
+        text-transform: uppercase;
+        color: var(--muted);
+        font-weight: 600;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    td.name { font-family: inherit; font-size: 15px; }
+    tr.fail td { background: #fbf1ec; }
+    tr.fail td.name { color: var(--accent); }
+
+    .note {
+        border-left: 3px solid var(--accent);
+        padding: 2px 0 2px 18px;
+        color: var(--muted);
+        margin: 28px 0;
+    }
+
+
+
+    .printonly { display: none; }
+
+    @media print {
+        body { padding: 0 12px 0; font-size: 12px; background: #fff; }
+        header { padding-top: 12px; }
+        section { margin-bottom: 26px; }
+        h2 { page-break-after: avoid; }
+        h3 { page-break-after: avoid; }
+        table { page-break-inside: avoid; }
+        figure { box-shadow: none; page-break-inside: avoid; }
+        .back { display: none; }
+        pre { white-space: pre-wrap; word-break: break-word; font-size: 10.5px; }
+        .tablewrap { overflow-x: visible; }
+        table { font-size: 11px; }
+        .printonly {
+            display: block;
+            font-family: ui-monospace, "SF Mono", Menlo, monospace;
+            font-size: 11px;
+            color: #6b6864;
+            margin-top: 14px;
+        }
+    }
+
+    @media (max-width: 720px) {
+        .pair, .trio, .grid { grid-template-columns: 1fr; }
+        .side { grid-template-columns: 1fr; }
+        header { padding-top: 48px; }
+    }
+</style>
+</head>
+<body>
+
+<header>
+    <p class="eyebrow">CS 180 &middot; Project 2</p>
+    <h1>Fun with Filters<br>and Frequencies</h1>
+    <p class="standfirst">Convolution from scratch, edge detection, unsharp masking, hybrid images, and multiresolution blending.</p>
+    <a class="back" href="../index.html">&larr; back to portfolio</a>
+    <p class="printonly">Live version: https://michaeltm365.github.io/2/ &mdash; this PDF is a print of that page.</p>
+</header>
+
+<main>
+
+<section>
+    <h2><span class="num">1.1</span>Convolutions from Scratch</h2>
+
+    <p>Convolution implemented two ways in numpy, with zero padding in both <code>"same"</code> and <code>"full"</code> modes, and the filter flipped before the sums.</p>
+
+    <pre><code>def conv_four_loops(arr, ker, padding = &quot;same&quot;):
+    ker = np.flip(ker)
+    H, W = arr.shape
+    kH, kW = ker.shape
+    h_pad = (kH-1) // 2
+    w_pad = (kW-1) // 2
+
+    if padding == &quot;same&quot;:
+        pad_arr = np.pad(arr, pad_width = ((h_pad, h_pad), (w_pad, w_pad)))
+    elif padding == &quot;full&quot;:
+        pad_arr = np.pad(arr, pad_width = ((kH-1,kH-1), (kW-1, kW-1)))
+
+    out = np.zeros([pad_arr.shape[0] - kH + 1, pad_arr.shape[1] - kW + 1])
+    for i_arr in range(out.shape[0]):
+        for j_arr in range(out.shape[1]):
+            out_val = 0
+            for i_ker in range(kH):
+                for j_ker in range(kW):
+                    out_val += ker[i_ker, j_ker] * pad_arr[i_arr + i_ker, j_arr + j_ker]
+            out[i_arr, j_arr] = out_val
+
+    return out</code></pre>
+    <pre><code>def conv_two_loops(arr, ker, padding = &quot;same&quot;):
+    ker = np.flip(ker)
+    H, W = arr.shape
+    kH, kW = ker.shape
+    h_pad = (kH-1) // 2
+    w_pad = (kW-1) // 2
+
+    if padding == &quot;same&quot;:
+        pad_arr = np.pad(arr, pad_width = ((h_pad, h_pad), (w_pad, w_pad)))
+    elif padding == &quot;full&quot;:
+        pad_arr = np.pad(arr, pad_width = ((kH-1,kH-1), (kW-1, kW-1)))
+        
+    out = np.zeros([pad_arr.shape[0] - kH + 1, pad_arr.shape[1] - kW + 1])
+    for i_arr in range(out.shape[0]):
+        for j_arr in range(out.shape[1]):
+            out[i_arr, j_arr] = np.sum(ker * pad_arr[i_arr : i_arr + kH, j_arr : j_arr + kW])
+
+    return out</code></pre>
+
+    <p>Both are compared against <code>scipy.signal.convolve2d</code> on a 638&times;482 grayscale selfie, over a 9&times;9 box filter and the two finite difference operators, in both padding modes.</p>
+
+    <div class="tablewrap">
+    <table>
+        <thead><tr><th>Kernel</th><th>Mode</th><th>Implementation</th><th>Output shape</th><th>max |diff| vs scipy</th><th>Time (s)</th></tr></thead>
+        <tbody>
+            <tr><td class="name">9&times;9 box</td><td>same</td><td>scipy</td><td>(638, 482)</td><td>&mdash;</td><td>0.350</td></tr>
+            <tr><td class="name">9&times;9 box</td><td>same</td><td>four loops</td><td>(638, 482)</td><td>1.22e&minus;15</td><td>3.285</td></tr>
+            <tr><td class="name">9&times;9 box</td><td>same</td><td>two loops</td><td>(638, 482)</td><td>8.88e&minus;16</td><td>0.474</td></tr>
+            <tr><td class="name">9&times;9 box</td><td>full</td><td>scipy</td><td>(646, 490)</td><td>&mdash;</td><td>0.021</td></tr>
+            <tr><td class="name">9&times;9 box</td><td>full</td><td>four loops</td><td>(646, 490)</td><td>1.22e&minus;15</td><td>3.458</td></tr>
+            <tr><td class="name">9&times;9 box</td><td>full</td><td>two loops</td><td>(646, 490)</td><td>8.88e&minus;16</td><td>0.476</td></tr>
+            <tr><td class="name">D<sub>x</sub> (1&times;3)</td><td>same</td><td>scipy</td><td>(638, 482)</td><td>&mdash;</td><td>0.002</td></tr>
+            <tr><td class="name">D<sub>x</sub> (1&times;3)</td><td>same</td><td>four loops</td><td>(638, 482)</td><td>0.0</td><td>0.210</td></tr>
+            <tr><td class="name">D<sub>x</sub> (1&times;3)</td><td>same</td><td>two loops</td><td>(638, 482)</td><td>0.0</td><td>0.442</td></tr>
+            <tr><td class="name">D<sub>x</sub> (1&times;3)</td><td>full</td><td>scipy</td><td>(638, 484)</td><td>&mdash;</td><td>0.002</td></tr>
+            <tr><td class="name">D<sub>x</sub> (1&times;3)</td><td>full</td><td>four loops</td><td>(638, 484)</td><td>0.0</td><td>0.223</td></tr>
+            <tr><td class="name">D<sub>x</sub> (1&times;3)</td><td>full</td><td>two loops</td><td>(638, 484)</td><td>0.0</td><td>0.474</td></tr>
+            <tr><td class="name">D<sub>y</sub> (3&times;1)</td><td>same</td><td>scipy</td><td>(638, 482)</td><td>&mdash;</td><td>0.002</td></tr>
+            <tr><td class="name">D<sub>y</sub> (3&times;1)</td><td>same</td><td>four loops</td><td>(638, 482)</td><td>0.0</td><td>0.229</td></tr>
+            <tr><td class="name">D<sub>y</sub> (3&times;1)</td><td>same</td><td>two loops</td><td>(638, 482)</td><td>0.0</td><td>0.461</td></tr>
+            <tr><td class="name">D<sub>y</sub> (3&times;1)</td><td>full</td><td>scipy</td><td>(640, 482)</td><td>&mdash;</td><td>0.002</td></tr>
+            <tr><td class="name">D<sub>y</sub> (3&times;1)</td><td>full</td><td>four loops</td><td>(640, 482)</td><td>0.0</td><td>0.246</td></tr>
+            <tr><td class="name">D<sub>y</sub> (3&times;1)</td><td>full</td><td>two loops</td><td>(640, 482)</td><td>0.0</td><td>0.453</td></tr>
+        </tbody>
+    </table>
+    </div>
+
+    <figure class="wide"><img src="media/part1_1_filters.png" alt="selfie convolved with box filter and finite difference operators, mine vs scipy">
+    <figcaption><b>Top row:</b> my two-loop implementation. <b>Bottom row:</b> <code>scipy.signal.convolve2d</code>. Left to right: original, 9&times;9 box, D<sub>x</sub>, D<sub>y</sub>. All in <code>"same"</code> mode.</figcaption></figure>
+
+    <h3>Runtime</h3>
+    <div class="quote">
+        <span class="src">from part1.py</span>
+        <p>Comments on runtime: for the larger kernel the four loop version is the slowest by far, followed by the two loop version, followed by the scipy version: as the underlying implementation becomes more vectorized, it gets significantly faster (the four loop version is the least vectorized). For the smaller kernel, the four loop version beats the two loop version as it avoids the numpy operations overhead.</p>
+    </div>
+
+    <h3>Boundaries</h3>
+    <div class="quote">
+        <span class="src">from part1.py</span>
+        <p>Comments on how boundaries are handled: by default, the boundaries are handled identically by my versions and the scipy version, as I set the "mode" parameter of scipy to match my "padding" parameter, and both use zero padding. If you change the "boundary" parameter in scipy to either "symm" or "wrap" instead of "pad", then the output from scipy appears slightly different around the border.</p>
+    </div>
+</section>
+
+<section>
+    <h2><span class="num">1.2</span>Finite Difference Operator</h2>
+
+    <p>D<sub>x</sub> = [1, 0, &minus;1] and D<sub>y</sub> = [1, 0, &minus;1]<sup>T</sup> applied to <code>cameraman.png</code>, gradient magnitude computed as &radic;(D<sub>x</sub>&sup2; + D<sub>y</sub>&sup2;), then binarized at a threshold of <b>0.1</b> (0.08 was also tried).</p>
+
+    <div class="four">
+        <figure><img src="media/cameraman_src.jpg" alt="cameraman original"><figcaption><b>Original</b><br>cameraman.png</figcaption></figure>
+        <figure><img src="media/grad_dx.jpg" alt="partial derivative in x"><figcaption><b>&part;/&part;x</b><br>im * D<sub>x</sub></figcaption></figure>
+        <figure><img src="media/grad_dy.jpg" alt="partial derivative in y"><figcaption><b>&part;/&part;y</b><br>im * D<sub>y</sub></figcaption></figure>
+        <figure><img src="media/grad_mag.jpg" alt="gradient magnitude"><figcaption><b>Gradient magnitude</b><br>&radic;(D<sub>x</sub>&sup2; + D<sub>y</sub>&sup2;)</figcaption></figure>
+    </div>
+
+    <figure class="solo"><img src="media/grad_mag_thresh.jpg" alt="binarized gradient magnitude"><figcaption><b>Binarized edge image</b> &mdash; threshold = 0.1</figcaption></figure>
+
+    <h3>Choosing the threshold</h3>
+    <div class="quote">
+        <span class="src">from part1.py</span>
+        <p>I landed on 0.1 as a middle ground between eliminating more noise towards the bottom of the image and missing some of the edges towards the top of the image</p>
+    </div>
+</section>
+
+<section>
+    <h2><span class="num">1.3</span>Derivative of Gaussian Filter</h2>
+
+    <p>A 9&times;9 Gaussian built with <code>cv2.getGaussianKernel(ksize=9, sigma=0)</code> and an outer product with its transpose. The DoG filters are that Gaussian convolved with D<sub>x</sub> and D<sub>y</sub> in <code>"full"</code> mode, giving 9&times;11 and 11&times;9 filters.</p>
+
+    <figure class="wide"><img src="media/part1_3_filters.png" alt="Gaussian and DoG filters visualized">
+    <figcaption><b>The filters themselves.</b> Gaussian on a sequential colormap; the two DoG filters on a diverging colormap centred at zero.</figcaption></figure>
+
+    <div class="kern">
+        <figure><img src="media/gauss_filter.png" alt="Gaussian filter"><figcaption><b>G</b> &mdash; 9&times;9</figcaption></figure>
+        <figure><img src="media/dog_x_filter.png" alt="DoG x filter"><figcaption><b>G * D<sub>x</sub></b> &mdash; 9&times;11</figcaption></figure>
+        <figure><img src="media/dog_y_filter.png" alt="DoG y filter"><figcaption><b>G * D<sub>y</sub></b> &mdash; 11&times;9</figcaption></figure>
+    </div>
+
+    <h3>Gaussian smoothing applied to the cameraman</h3>
+    <div class="four">
+        <figure><img src="media/cameraman_blurred.jpg" alt="blurred cameraman"><figcaption><b>Blurred</b><br>G * im</figcaption></figure>
+        <figure><img src="media/grad_dx_gauss.jpg" alt="dx of blurred"><figcaption><b>&part;/&part;x</b><br>of blurred</figcaption></figure>
+        <figure><img src="media/grad_dy_gauss.jpg" alt="dy of blurred"><figcaption><b>&part;/&part;y</b><br>of blurred</figcaption></figure>
+        <figure><img src="media/grad_mag_gauss.jpg" alt="gradient magnitude of blurred"><figcaption><b>Gradient magnitude</b><br>of blurred</figcaption></figure>
+    </div>
+
+    <div class="pair">
+        <figure><img src="media/grad_mag_gauss.jpg" alt="blur then derivative magnitude"><figcaption><b>Blur, then D<sub>x</sub>/D<sub>y</sub></b><br>gradient magnitude</figcaption></figure>
+        <figure><img src="media/grad_mag_dog.jpg" alt="DoG magnitude"><figcaption><b>Single DoG convolution</b><br>gradient magnitude</figcaption></figure>
+    </div>
+
+    <h3>Binarized, all three routes</h3>
+    <div class="trio">
+        <figure><img src="media/grad_mag_thresh.jpg" alt="finite difference edges"><figcaption><b>1.2 &mdash; finite difference</b><br>threshold = 0.1</figcaption></figure>
+        <figure><img src="media/grad_mag_gauss_thresh.jpg" alt="blur then derivative"><figcaption><b>Gaussian blur, then D<sub>x</sub>/D<sub>y</sub></b><br>threshold = 0.1</figcaption></figure>
+        <figure><img src="media/grad_mag_dog_thresh.jpg" alt="DoG edges"><figcaption><b>Single DoG convolution</b><br>threshold = 0.1</figcaption></figure>
+    </div>
+
+    <div class="quote">
+        <span class="src">from part1.py</span>
+        <p>Comments: compared to the finite difference version, using the Gaussian filter produced a much smoother edge detector (the noise in the bottom half of the image no longer appears). This is because the Gaussian is a low pass filter, which removes high frequencies (corresponding to noise) before the derivatives are applied</p>
+        <p>The images produced by the two DoG implementations are qualitatively identical, with only slight discrepancies near the borders</p>
+    </div>
+</section>
+
+<section>
+    <h2><span class="num">2.1</span>Image Sharpening</h2>
+
+    <div class="quote">
+        <span class="src">from part2_1.py</span>
+        <p>how the unsharp masked filter works: the Guassian blur filter G is a low pass filter: it removes high frequency details. Hence, doing high_freq = im - (G * im) leaves only the high frequency details of im. we can add high_freq back to im to emphasize the high frequencies of im, leaving a "sharpened" image.</p>
+    </div>
+
+    <p>Collapsed into the single kernel <code>(1 + &alpha;)&middot;&delta; &minus; &alpha;&middot;G</code>. Against the three-step version this agrees to 1.78e&minus;15 on the Taj and 2.00e&minus;15 on the selfie.</p>
+
+    <figure class="wide"><img src="media/part2_1_taj.png" alt="taj sharpening progression">
+    <figcaption><b>taj.jpg</b> &mdash; original, blurred, high frequencies, sharpened at &alpha; = 1.0.</figcaption></figure>
+
+    <figure class="wide"><img src="media/part2_1_selfie.png" alt="selfie sharpening progression">
+    <figcaption><b>selfie.png</b> &mdash; same progression, &alpha; = 1.0.</figcaption></figure>
+
+    <h3>Varying the sharpening amount</h3>
+    <figure class="wide"><img src="media/part2_1_alpha_sweep.png" alt="alpha sweep on taj">
+    <figcaption><b>taj.jpg</b> at &alpha; = 0, 0.5, 1, 2, 4, 8.</figcaption></figure>
+
+    <h3>Blurring a sharp image, then re-sharpening</h3>
+    <figure class="wide"><img src="media/part2_1_blur_resharpen.png" alt="blur then resharpen">
+    <figcaption>Original, blurred with a 9&times;9 Gaussian, then re-sharpened at four values of &alpha;.</figcaption></figure>
+
+    <figure class="wide"><img src="media/part2_1_blur_resharpen_detail.png" alt="blur then resharpen detail crop">
+    <figcaption>200&times;200 crop at full resolution: original, blurred, best re-sharpened.</figcaption></figure>
+
+    <div class="tablewrap">
+    <table>
+        <thead><tr><th>Image</th><th>mean |diff| vs original</th></tr></thead>
+        <tbody>
+            <tr><td class="name">blurred</td><td>0.0381</td></tr>
+            <tr><td class="name">re-sharpened, &alpha; = 0.5</td><td>0.0352</td></tr>
+            <tr><td class="name">re-sharpened, &alpha; = 1</td><td>0.0330</td></tr>
+            <tr><td class="name">re-sharpened, &alpha; = 2</td><td>0.0315</td></tr>
+            <tr><td class="name">re-sharpened, &alpha; = 4</td><td>0.0374</td></tr>
+        </tbody>
+    </table>
+    </div>
+
+    <div class="quote">
+        <span class="src">from part2_1.py</span>
+        <p>comment on blurring a sharp image, then trying to resharpen it: across different alphas, the mean absolute difference between the resharpened image and the original image remains high. This is because there is no way to recover the high frequencies that were completely zeroed out by the Guassian low pass filter, no matter how high alpha is. If you keep increasing alpha you are just amplifying noise.</p>
+    </div>
+</section>
+
+<section>
+    <h2><span class="num">2.2</span>Hybrid Images</h2>
+
+    <p>Image 1 is high-pass filtered as <code>im1 &minus; G(&sigma;<sub>1</sub>) * im1</code>, image 2 is low-pass filtered as <code>G(&sigma;<sub>2</sub>) * im2</code>, and the two are summed. Kernel size is <code>6&sigma; + 1</code> in each case. Alignment uses two hand-picked corresponding points per pair.</p>
+
+    <h3>Derek and Nutmeg</h3>
+    <div class="pair">
+        <figure><img src="media/DerekPicture_src.jpg" alt="Derek"><figcaption><b>Input 1</b> &mdash; high frequencies</figcaption></figure>
+        <figure><img src="media/nutmeg_src.jpg" alt="Nutmeg"><figcaption><b>Input 2</b> &mdash; low frequencies</figcaption></figure>
+    </div>
+    <figure class="wide"><img src="media/part2_2_derek_nutmeg.png" alt="derek nutmeg hybrid">
+    <figcaption>Aligned inputs and the hybrid at &sigma;<sub>1</sub> = 3, &sigma;<sub>2</sub> = 3.</figcaption></figure>
+    <div class="quote">
+        <span class="src">from hybrid_image_derek_nutmeg.py</span>
+        <p>(2, 2): too small<br>(5, 10): too much human, not enough cat<br>(3, 3): just right</p>
+    </div>
+
+    <h3>Ferrari and Lamborghini &mdash; full frequency analysis</h3>
+    <div class="pair">
+        <figure><img src="media/ferrari_src.jpg" alt="ferrari"><figcaption><b>Input 1</b> &mdash; high frequencies</figcaption></figure>
+        <figure><img src="media/lambo_src.jpg" alt="lambo"><figcaption><b>Input 2</b> &mdash; low frequencies</figcaption></figure>
+    </div>
+    <figure class="wide"><img src="media/part2_2_ferrari_lambo_fft.png" alt="ferrari lambo fft analysis">
+    <figcaption><b>Top row:</b> aligned inputs, high-passed Ferrari, low-passed Lambo, hybrid. <b>Bottom row:</b> <code>np.log(np.abs(np.fft.fftshift(np.fft.fft2(gray_image))))</code> of each. &sigma;<sub>1</sub> = 2, &sigma;<sub>2</sub> = 5.</figcaption></figure>
+    <div class="quote">
+        <span class="src">from hybrid_image_ferrari_lambo.py</span>
+        <p>other values tried:<br>(3, 3): lambo not blurry enough<br>(3, 6): lambo too blurry<br>with (2, 5), watch how hte horse logo in the center dissapears at a distance</p>
+    </div>
+    <figure class="wide"><img src="media/part2_2_ferrari_lambo_sigma_sweep.png" alt="sigma sweep failure modes">
+    <figcaption>Unsuitable cutoff values, with the chosen pair in the last cell.</figcaption></figure>
+
+    <h3>Spider and Jellyfish &mdash; failure case</h3>
+    <div class="pair">
+        <figure><img src="media/spider_src.jpg" alt="spider"><figcaption><b>Input 1</b> &mdash; high frequencies</figcaption></figure>
+        <figure><img src="media/jellyfish_src.jpg" alt="jellyfish"><figcaption><b>Input 2</b> &mdash; low frequencies</figcaption></figure>
+    </div>
+    <figure class="wide"><img src="media/part2_2_spider_jellyfish.png" alt="spider jellyfish hybrid">
+    <figcaption>Aligned inputs and the hybrid at &sigma;<sub>1</sub> = 6, &sigma;<sub>2</sub> = 3.</figcaption></figure>
+    <div class="quote">
+        <span class="src">from hybrid_image_spider_jellyfish.py</span>
+        <p>other values tried: (5, 10), (2, 6), (3, 3)</p>
+        <p>FAILURE CASE: the high contrast in the jellyfish image and the object size variation between the images made this a failure case</p>
+    </div>
+</section>
+
+<section>
+    <h2><span class="num">2.3</span>Gaussian and Laplacian Stacks</h2>
+
+    <p>No downsampling &mdash; every level keeps the original dimensions. Level 0 of the Gaussian stack is the unblurred image; level <i>i</i> is the original convolved with a Gaussian of &sigma;<sub>i</sub> = &sigma;<sub>0</sub>&middot;2<sup>i&minus;1</sup>. The Laplacian levels are successive differences, with the final Gaussian level kept as the residual.</p>
+
+    <pre><code>def gauss_stack(im, sigma_0, levels):
+    out = []
+    out.append(im)
+    for i in range(levels - 1):
+        sigma_i = sigma_0 * (2 ** i)
+        ker_i = gaussian_kernel(ksize=6 * sigma_i + 1, sigma=sigma_i)
+        im_i = scipy.signal.convolve2d(im, ker_i, mode = &quot;same&quot;)
+        out.append(im_i)
+    return np.array(out)</code></pre>
+    <pre><code>def laplace_stack(g_stack):
+    out = []
+    for i in range(len(g_stack) - 1):
+        d = g_stack[i] - g_stack[i + 1]
+        out.append(d)
+    out.append(g_stack[-1])
+    return np.array(out)</code></pre>
+
+    <p>Reconstruction check &mdash; <code>np.abs(sum(laplacian_stack) - original).max()</code> returns <b>1.11e&minus;16</b> for every image used below.</p>
+
+    <p>Recreating Szeliski Figure 3.42 (a)&ndash;(l), with &sigma;<sub>0</sub> = 2 and 5 levels:</p>
+
+    <figure class="wide"><img src="media/part2_3_figure_3_42.png" alt="figure 3.42 apple orange">
+    <figcaption><b>Rows:</b> Laplacian levels 0, 2 and 4, then the result row. <b>Columns:</b> apple weighted by <i>GR</i>, orange weighted by (1 &minus; <i>GR</i>), and their sum.</figcaption></figure>
+</section>
+
+<section>
+    <h2><span class="num">2.4</span>Multiresolution Blending</h2>
+
+    <p>Following the mask-based algorithm on page 230 of Burt &amp; Adelson: build Laplacian stacks for both images, a Gaussian stack for the binary mask <i>R</i>, then combine level by level as <code>LS<sub>l</sub> = GR<sub>l</sub>&middot;LA<sub>l</sub> + (1 &minus; GR<sub>l</sub>)&middot;LB<sub>l</sub></code> and sum.</p>
+
+    <pre><code>def blend(im1, im2, mask, sigma_0, levels):
+    out_stack = []
+    gr = gauss_stack(mask, sigma_0, levels)
+    ga, la = gauss_laplace_stack(im1, sigma_0, levels)
+    gb, lb = gauss_laplace_stack(im2, sigma_0, levels)
+
+    # check if laplace is working (should be ~0)
+    print(np.abs(sum(la) - im1).max())
+    print(np.abs(sum(lb) - im2).max())
+
+    for i in range(levels):
+        avg = gr[i] * la[i] + (1 - gr[i]) * lb[i]
+        out_stack.append(avg)
+    out_stack = np.array(out_stack)
+    return np.sum(out_stack, axis=0)</code></pre>
+
+    <h3>The oraple &mdash; vertical seam</h3>
+    <div class="trio">
+        <figure><img src="media/apple_src.jpg" alt="apple"><figcaption><b>apple.jpeg</b></figcaption></figure>
+        <figure><img src="media/orange_src.jpg" alt="orange"><figcaption><b>orange.jpeg</b></figcaption></figure>
+        <figure><img src="media/blend_oraple.jpg" alt="oraple"><figcaption><b>Blended</b> &mdash; step mask, &sigma;<sub>0</sub> = 2, 5 levels</figcaption></figure>
+    </div>
+
+    <h3>Ocean and lava &mdash; irregular mask</h3>
+    <div class="trio">
+        <figure><img src="media/ocean_src.jpg" alt="ocean"><figcaption><b>ocean.jpg</b></figcaption></figure>
+        <figure><img src="media/lava_src.jpg" alt="lava"><figcaption><b>lava.jpg</b></figcaption></figure>
+        <figure><img src="media/blend_ocean_lava.jpg" alt="ocean lava blend"><figcaption><b>Blended</b> &mdash; circular mask</figcaption></figure>
+    </div>
+
+    <h3>Earth and Mars &mdash; irregular mask</h3>
+    <p>Both irregular blends use the same circular mask, built as a binary distance test and left hard-edged; the Gaussian stack does the softening.</p>
+
+    <pre><code>def create_circle_mask(h, w, center=None, radius=None):
+    cy, cx = center if center is not None else (h // 2, w // 2)
+    r = radius if radius is not None else min(h, w) // 4
+    rows, cols = np.ogrid[:h, :w]
+    return ((rows - cy) ** 2 + (cols - cx) ** 2 &lt;= r ** 2).astype(float)</code></pre>
+
+    <div class="trio">
+        <figure><img src="media/earth_src.jpg" alt="earth"><figcaption><b>earth.jpg</b></figcaption></figure>
+        <figure><img src="media/mars_surface_src.jpg" alt="mars"><figcaption><b>mars_surface.jpg</b></figcaption></figure>
+        <figure><img src="media/blend_earth_mars.jpg" alt="earth mars blend"><figcaption><b>Blended</b> &mdash; circular mask</figcaption></figure>
+    </div>
+
+    <figure class="wide"><img src="media/part2_4_figure_3_42_earth_mars.png" alt="figure 3.42 earth mars">
+    <figcaption>The same Laplacian stack breakdown for the circular-mask blend.</figcaption></figure>
+</section>
+
+<section>
+    <h2><span class="num">&mdash;</span>What I learned</h2>
+    <div class="quote">
+        <p>the most important thing I learned was how to isolate and combine different frequencies and semantic aspects of an image, particularly with Gaussian and Laplacian stacks/pyramids!</p>
+    </div>
+</section>
+
+</main>
+
+</body>
+</html>

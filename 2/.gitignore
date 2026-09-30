@@ -1,0 +1,18 @@
+# working notes, not part of the deliverable
+context/
+
+# the assignment says not to host code publicly
+*.py
+
+# inputs and full-resolution outputs: the webpage uses media/ instead
+output/
+spline/
+/*.jpg
+/*.jpeg
+/*.png
+
+# assembled Gradescope submission
+build/
+proj2_submission.zip
+
+.DS_Store
