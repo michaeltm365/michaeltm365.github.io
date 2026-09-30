@@ -436,10 +436,13 @@
         <p>how the unsharp masked filter works: the Guassian blur filter G is a low pass filter: it removes high frequency details. Hence, doing high_freq = im - (G * im) leaves only the high frequency details of im. we can add high_freq back to im to emphasize the high frequencies of im, leaving a "sharpened" image.</p>
     </div>
 
-    <p>Collapsed into the single kernel <code>(1 + &alpha;)&middot;&delta; &minus; &alpha;&middot;G</code>. Against the three-step version this agrees to 1.78e&minus;15 on the Taj.</p>
+    <p>Collapsed into the single kernel <code>(1 + &alpha;)&middot;&delta; &minus; &alpha;&middot;G</code>. Against the three-step version this agrees to 1.78e&minus;15 on the Taj and 1.55e&minus;15 on the waterfall.</p>
 
     <figure class="wide"><img src="media/part2_1_taj.png" alt="taj sharpening progression">
     <figcaption><b>taj.jpg</b> &mdash; original, blurred, high frequencies, sharpened at &alpha; = 1.0.</figcaption></figure>
+
+    <figure class="wide"><img src="media/part2_1_waterfall.png" alt="waterfall sharpening progression">
+    <figcaption><b>sharp_image.jpg</b> &mdash; same progression, &alpha; = 1.0.</figcaption></figure>
 
     <h3>Varying the sharpening amount</h3>
     <figure class="wide"><img src="media/part2_1_alpha_sweep.png" alt="alpha sweep on taj">
