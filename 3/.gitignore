@@ -1,0 +1,11 @@
+# working notes, blank/reference notebooks, and extracted outputs, not part of the deliverable
+context/
+
+# the assignment says not to host code publicly
+*.ipynb
+
+# assembled Gradescope submission
+build/
+proj3_submission.zip
+
+.DS_Store
