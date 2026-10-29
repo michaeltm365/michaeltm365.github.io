@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Project 4A: Image Warping and Mosaicing</title>
+<style>
+    :root {
+        --bg: #f7f5f2;
+        --panel: #ffffff;
+        --ink: #1c1b19;
+        --muted: #6b6864;
+        --rule: #e2ded8;
+        --accent: #b4451f;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+        margin: 0;
+        padding: 0 24px 96px;
+        background: var(--bg);
+        color: var(--ink);
+        font: 17px/1.65 "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    header, main { max-width: 900px; margin: 0 auto; }
+
+    header {
+        padding: 72px 0 40px;
+        border-bottom: 1px solid var(--rule);
+        margin-bottom: 56px;
+    }
+
+    .eyebrow {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        letter-spacing: .18em;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin: 0 0 14px;
+    }
+
+    h1 {
+        font-size: clamp(32px, 6vw, 52px);
+        line-height: 1.1;
+        font-weight: 600;
+        letter-spacing: -.02em;
+        margin: 0;
+    }
+
+    .standfirst {
+        color: var(--muted);
+        font-size: 19px;
+        margin: 22px 0 0;
+        max-width: 640px;
+    }
+
+    .back {
+        display: inline-block;
+        margin-top: 28px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 13px;
+        color: var(--muted);
+        text-decoration: none;
+        border-bottom: 1px solid var(--rule);
+        padding-bottom: 2px;
+    }
+    .back:hover { color: var(--accent); border-color: var(--accent); }
+
+    .part {
+        font-size: clamp(26px, 4.5vw, 38px);
+        font-weight: 600;
+        letter-spacing: -.02em;
+        margin: 0 0 48px;
+        padding-bottom: 18px;
+        border-bottom: 1px solid var(--rule);
+    }
+    .part .num {
+        display: block;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        letter-spacing: .18em;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin-bottom: 8px;
+    }
+
+    section { margin-bottom: 72px; }
+
+    h2 {
+        font-size: 27px;
+        font-weight: 600;
+        letter-spacing: -.01em;
+        margin: 0 0 20px;
+    }
+
+    h2 .num {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 14px;
+        color: var(--accent);
+        margin-right: 12px;
+        vertical-align: 3px;
+    }
+
+    h3 {
+        font-size: 19px;
+        font-weight: 600;
+        margin: 40px 0 14px;
+    }
+
+    p { margin: 0 0 18px; }
+
+    a { color: var(--accent); }
+
+    code {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: .86em;
+        background: #ece8e2;
+        padding: 1px 5px;
+        border-radius: 4px;
+    }
+
+    .eq {
+        background: var(--panel);
+        border: 1px solid var(--rule);
+        border-radius: 8px;
+        padding: 14px 18px;
+        margin: 0 0 18px;
+        font-size: 18px;
+        text-align: center;
+        overflow-x: auto;
+    }
+    .eq i { font-family: inherit; }
+
+    .pair {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        margin-top: 28px;
+    }
+
+    figure {
+        margin: 0;
+        background: var(--panel);
+        padding: 12px;
+        border: 1px solid var(--rule);
+        border-radius: 10px;
+        box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.05);
+    }
+
+    figure img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: 5px;
+        background: #eceae6;
+    }
+
+    figcaption {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11.5px;
+        line-height: 1.5;
+        color: var(--muted);
+        margin-top: 10px;
+        letter-spacing: .01em;
+    }
+    figcaption b { color: var(--ink); font-weight: 600; }
+
+    .solo { max-width: 620px; margin: 28px auto 0; }
+    .wide { margin-top: 28px; }
+
+    .photos {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        margin-top: 28px;
+    }
+
+    .mat {
+        display: inline-table;
+        border-collapse: separate;
+        border-spacing: 10px 2px;
+        border-left: 1.5px solid var(--ink);
+        border-right: 1.5px solid var(--ink);
+        border-radius: 4px;
+        vertical-align: middle;
+        font-size: 16px;
+    }
+    .mat td { text-align: right; padding: 0 2px; white-space: nowrap; }
+    .mat.num td { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 13.5px; }
+    .eq .op { margin: 0 10px; vertical-align: middle; }
+    .eq .lbl {
+        display: block;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11.5px;
+        color: var(--muted);
+        margin-bottom: 8px;
+    }
+
+    .quote {
+        border-left: 3px solid var(--accent);
+        padding: 4px 0 4px 20px;
+        margin: 26px 0;
+        color: #34322e;
+    }
+    .quote p:last-child { margin-bottom: 0; }
+
+    .printonly { display: none; }
+
+    @media print {
+        body { padding: 0 12px 0; font-size: 12px; background: #fff; }
+        header { padding-top: 12px; }
+        section { margin-bottom: 26px; }
+        h2, h3 { page-break-after: avoid; }
+        figure { box-shadow: none; page-break-inside: avoid; }
+        .back { display: none; }
+        .printonly {
+            display: block;
+            font-family: ui-monospace, "SF Mono", Menlo, monospace;
+            font-size: 11px;
+            color: #6b6864;
+            margin-top: 14px;
+        }
+    }
+
+    @media (max-width: 720px) {
+        .pair, .photos { grid-template-columns: 1fr; }
+        header { padding-top: 48px; }
+    }
+</style>
+</head>
+<body>
+
+<header>
+    <p class="eyebrow">CS 180 &middot; Project 4A</p>
+    <h1>Image Warping<br>and Mosaicing</h1>
+    <p class="standfirst">Recovering homographies, inverse warping, rectification, and blending image mosaics.</p>
+    <a class="back" href="../index.html">&larr; back to portfolio</a>
+    <p class="printonly">Live version: https://michaeltm365.github.io/4/ &mdash; this PDF is a print of that page.</p>
+</header>
+
+<main>
+
+<section>
+    <h2><span class="num">A.1</span>Shoot the Pictures</h2>
+    <p>Three pairs of photos with overlapping fields of view, taken by rotating the camera about a fixed center of projection, plus two photos of rectangular objects for rectification.</p>
+
+    <h3>Mosaic A</h3>
+    <div class="photos">
+        <figure><img src="media/mosaic_a_1.jpg" alt="mosaic A, image 1"><figcaption><b>mosaic_a_1</b></figcaption></figure>
+        <figure><img src="media/mosaic_a_2.jpg" alt="mosaic A, image 2"><figcaption><b>mosaic_a_2</b></figcaption></figure>
+    </div>
+
+    <h3>Mosaic B</h3>
+    <div class="photos">
+        <figure><img src="media/mosaic_b_1.jpg" alt="mosaic B, image 1"><figcaption><b>mosaic_b_1</b></figcaption></figure>
+        <figure><img src="media/mosaic_b_2.jpg" alt="mosaic B, image 2"><figcaption><b>mosaic_b_2</b></figcaption></figure>
+    </div>
+
+    <h3>Mosaic C</h3>
+    <div class="photos">
+        <figure><img src="media/mosaic_c_1.jpg" alt="mosaic C, image 1"><figcaption><b>mosaic_c_1</b></figcaption></figure>
+        <figure><img src="media/mosaic_c_2.jpg" alt="mosaic C, image 2"><figcaption><b>mosaic_c_2</b></figcaption></figure>
+    </div>
+
+    <h3>Rectification</h3>
+    <div class="photos">
+        <figure><img src="media/rect1.jpg" alt="rectification image 1"><figcaption><b>rect1</b></figcaption></figure>
+        <figure><img src="media/rect2.jpg" alt="rectification image 2"><figcaption><b>rect2</b></figcaption></figure>
+    </div>
+</section>
+
+<section>
+    <h2><span class="num">A.2</span>Recover Homographies</h2>
+    <p>A homography maps points in image 1 to image 2, with 8 unknowns (the bottom-right entry is fixed to 1).</p>
+    <div class="eq">
+        <table class="mat"><tr><td><i>wx&prime;</i></td></tr><tr><td><i>wy&prime;</i></td></tr><tr><td><i>w</i></td></tr></table>
+        <span class="op">=</span>
+        <table class="mat"><tr><td><i>a</i></td><td><i>b</i></td><td><i>c</i></td></tr><tr><td><i>d</i></td><td><i>e</i></td><td><i>f</i></td></tr><tr><td><i>g</i></td><td><i>h</i></td><td>1</td></tr></table>
+        <table class="mat"><tr><td><i>x</i></td></tr><tr><td><i>y</i></td></tr><tr><td>1</td></tr></table>
+    </div>
+    <p>Dividing out <i>w</i> and multiplying through by the denominator gives two linear equations per correspondence. Stacking all <i>n</i> correspondences gives a 2<i>n</i> &times; 8 system, solved with least squares.</p>
+    <div class="eq">
+        <span class="lbl">one pair of rows per correspondence (x, y) &rarr; (x&prime;, y&prime;)</span>
+        <table class="mat">
+            <tr><td><i>x</i></td><td><i>y</i></td><td>1</td><td>0</td><td>0</td><td>0</td><td>&minus;<i>xx&prime;</i></td><td>&minus;<i>yx&prime;</i></td></tr>
+            <tr><td>0</td><td>0</td><td>0</td><td><i>x</i></td><td><i>y</i></td><td>1</td><td>&minus;<i>xy&prime;</i></td><td>&minus;<i>yy&prime;</i></td></tr>
+            <tr><td></td><td></td><td></td><td>&vellip;</td><td></td><td></td><td></td><td></td></tr>
+        </table>
+        <table class="mat"><tr><td><i>a</i></td></tr><tr><td><i>b</i></td></tr><tr><td><i>c</i></td></tr><tr><td><i>d</i></td></tr><tr><td><i>e</i></td></tr><tr><td><i>f</i></td></tr><tr><td><i>g</i></td></tr><tr><td><i>h</i></td></tr></table>
+        <span class="op">=</span>
+        <table class="mat"><tr><td><i>x&prime;</i></td></tr><tr><td><i>y&prime;</i></td></tr><tr><td>&vellip;</td></tr></table>
+    </div>
+    <div class="eq"><i>h</i> = argmin<sub><i>h</i></sub> &Vert;<i>Ah</i> &minus; <i>b</i>&Vert;<sup>2</sup></div>
+
+    <h3>Correspondences</h3>
+    <figure class="wide"><img src="media/mosaic_a_correspondences.jpg" alt="mosaic A correspondences"><figcaption><b>Mosaic A</b> &mdash; 16 correspondences</figcaption></figure>
+    <figure class="wide"><img src="media/mosaic_b_correspondences.jpg" alt="mosaic B correspondences"><figcaption><b>Mosaic B</b> &mdash; 16 correspondences</figcaption></figure>
+    <figure class="wide"><img src="media/mosaic_c_correspondences.jpg" alt="mosaic C correspondences"><figcaption><b>Mosaic C</b> &mdash; 16 correspondences</figcaption></figure>
+
+    <h3>Recovered homographies</h3>
+    <p>Computed on coordinates scaled by 0.2, the resolution used for warping.</p>
+    <div class="eq">
+        <span class="lbl">mosaic A: mosaic_a_1 &rarr; mosaic_a_2</span>
+        <i>H</i> <span class="op">=</span>
+        <table class="mat num">
+            <tr><td>1.289657</td><td>&minus;0.019695</td><td>&minus;276.702661</td></tr>
+            <tr><td>0.209838</td><td>1.185133</td><td>&minus;131.190531</td></tr>
+            <tr><td>0.000326</td><td>0.000008</td><td>1</td></tr>
+        </table>
+    </div>
+    <div class="eq">
+        <span class="lbl">mosaic B: mosaic_b_1 &rarr; mosaic_b_2</span>
+        <i>H</i> <span class="op">=</span>
+        <table class="mat num">
+            <tr><td>1.207345</td><td>&minus;0.139159</td><td>&minus;191.074945</td></tr>
+            <tr><td>0.273896</td><td>1.126796</td><td>&minus;183.747106</td></tr>
+            <tr><td>0.000243</td><td>&minus;0.000003</td><td>1</td></tr>
+        </table>
+    </div>
+    <div class="eq">
+        <span class="lbl">mosaic C: mosaic_c_1 &rarr; mosaic_c_2</span>
+        <i>H</i> <span class="op">=</span>
+        <table class="mat num">
+            <tr><td>1.405676</td><td>&minus;0.015747</td><td>&minus;388.474995</td></tr>
+            <tr><td>0.245106</td><td>1.289990</td><td>&minus;166.007645</td></tr>
+            <tr><td>0.000440</td><td>0.000048</td><td>1</td></tr>
+        </table>
+    </div>
+</section>
+
+<section>
+    <h2><span class="num">A.3</span>Warp the Images</h2>
+    <p>Inverse warping: the output bounding box comes from passing the four corners through <i>H</i>, then every output pixel is mapped back into the source image and sampled. Pixels that map outside the source are left empty.</p>
+    <div class="eq"><i>p</i> = <i>H</i><sup>&minus;1</sup><i>p&prime;</i></div>
+    <p><b>Nearest neighbor</b> takes the closest source pixel. <b>Bilinear</b> takes a weighted average of the four surrounding pixels, with <i>I<sub>ij</sub></i> = <i>I</i>(<i>x<sub>i</sub></i>, <i>y<sub>j</sub></i>), <i>x</i><sub>1</sub> = &lfloor;<i>x</i>&rfloor;, <i>x</i><sub>2</sub> = <i>x</i><sub>1</sub> + 1 (same for <i>y</i>), <i>a</i> = <i>x</i> &minus; <i>x</i><sub>1</sub>, and <i>b</i> = <i>y</i> &minus; <i>y</i><sub>1</sub>.</p>
+    <div class="eq"><i>I</i>(<i>x</i>, <i>y</i>) = (1&minus;<i>a</i>)(1&minus;<i>b</i>)&thinsp;<i>I</i><sub>11</sub> + <i>a</i>(1&minus;<i>b</i>)&thinsp;<i>I</i><sub>21</sub> + (1&minus;<i>a</i>)<i>b</i>&thinsp;<i>I</i><sub>12</sub> + <i>ab</i>&thinsp;<i>I</i><sub>22</sub></div>
+
+    <h3>Rectification</h3>
+    <p>Four corners of a rectangular object are mapped to an axis-aligned rectangle.</p>
+    <figure class="wide"><img src="media/rect1_comparison.jpg" alt="rect1 original, nearest neighbor, and bilinear rectification"><figcaption><b>rect1</b> &mdash; original with clicked corners / nearest neighbor / bilinear</figcaption></figure>
+    <figure class="wide"><img src="media/rect2_comparison.jpg" alt="rect2 original, nearest neighbor, and bilinear rectification"><figcaption><b>rect2</b> &mdash; original with clicked corners / nearest neighbor / bilinear</figcaption></figure>
+</section>
+
+<section>
+    <h2><span class="num">A.4</span>Blend the Images into a Mosaic</h2>
+    <p>Image 2 is the reference and image 1 is warped into its frame with bilinear interpolation. The two are combined with a weighted average, where each weight is the normalized distance transform of that image's mask.</p>
+    <div class="eq"><i>w<sub>i</sub></i> = dist(<i>M<sub>i</sub></i>) / max dist(<i>M<sub>i</sub></i>), &nbsp;&nbsp; mosaic = (<i>w</i><sub>1</sub><i>I</i><sub>1</sub> + <i>w</i><sub>2</sub><i>I</i><sub>2</sub>) / (<i>w</i><sub>1</sub> + <i>w</i><sub>2</sub>)</div>
+
+    <h3>Mosaic A</h3>
+    <figure class="wide"><img src="media/mosaic_a_sources.jpg" alt="mosaic A sources and result"><figcaption><b>mosaic_a_1</b> / <b>mosaic_a_2</b> / <b>feathered mosaic</b></figcaption></figure>
+    <figure class="solo"><img src="media/mosaic_a.jpg" alt="mosaic A"><figcaption><b>Mosaic A</b></figcaption></figure>
+
+    <h3>Mosaic B</h3>
+    <figure class="wide"><img src="media/mosaic_b_sources.jpg" alt="mosaic B sources and result"><figcaption><b>mosaic_b_1</b> / <b>mosaic_b_2</b> / <b>feathered mosaic</b></figcaption></figure>
+    <figure class="solo"><img src="media/mosaic_b.jpg" alt="mosaic B"><figcaption><b>Mosaic B</b></figcaption></figure>
+
+    <h3>Mosaic C</h3>
+    <figure class="wide"><img src="media/mosaic_c_sources.jpg" alt="mosaic C sources and result"><figcaption><b>mosaic_c_1</b> / <b>mosaic_c_2</b> / <b>feathered mosaic</b></figcaption></figure>
+    <figure class="solo"><img src="media/mosaic_c.jpg" alt="mosaic C"><figcaption><b>Mosaic C</b></figcaption></figure>
+
+    <h3>Procedure</h3>
+    <div class="quote">
+        <p>My mosaicing procedure: I start by calculating the size of the final mosaic image with the compute_canvas_size function and creating two output arrays of that size (all zeros), so I can them map pixels from the source images onto them. Then, the pixels from the warped im1 are mapped onto canvas1, and the pixels from im2 are pasted onto canvas2 with an offset. Simultaenously, a binary mask is created for each canvas indicating whether or not a pixel was mapped to there. These masks are put through the distance_transform_edt function and normalized to get weights for each pixel. The resulting mask is such that pixels near the edges of each image and overlap regions get reduced weight, helping reduce seams. Then, the final mosaic is created by blending the two canvases according to the weighted masks using the feather_blend function.</p>
+        <p>At first, I started with 8 correspondences that were too close together, and noticed artifacts in the sparser parts of the image (see my 8 point mosaic). To resolve this, I upgraded to 16 correspondences, which provided a robust fit.</p>
+    </div>
+
+    <h3>8 point mosaic</h3>
+    <figure class="wide"><img src="media/mosaic_a_correspondences_8pts.jpg" alt="mosaic A with 8 correspondences"><figcaption><b>Mosaic A</b> &mdash; 8 correspondences</figcaption></figure>
+    <figure class="solo"><img src="media/mosaic_a_8pts.jpg" alt="mosaic A from 8 correspondences"><figcaption><b>Mosaic A</b> &mdash; 8 correspondences</figcaption></figure>
+</section>
+
+</main>
+
+</body>
+</html>

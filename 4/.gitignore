@@ -1,0 +1,13 @@
+# the assignment says not to host code publicly
+*.py
+__pycache__/
+
+# inputs and full-resolution outputs: the webpage uses media/ instead
+data/
+output/
+
+# assembled Gradescope submission
+build/
+proj4_submission.zip
+
+.DS_Store
