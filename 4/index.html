@@ -342,6 +342,11 @@
     <p>Four corners of a rectangular object are mapped to an axis-aligned rectangle.</p>
     <figure class="wide"><img src="media/rect1_comparison.jpg" alt="rect1 original, nearest neighbor, and bilinear rectification"><figcaption><b>rect1</b> &mdash; original with clicked corners / nearest neighbor / bilinear</figcaption></figure>
     <figure class="wide"><img src="media/rect2_comparison.jpg" alt="rect2 original, nearest neighbor, and bilinear rectification"><figcaption><b>rect2</b> &mdash; original with clicked corners / nearest neighbor / bilinear</figcaption></figure>
+
+    <h3>Nearest neighbor vs. bilinear</h3>
+    <div class="quote">
+        <p>Bilinear interpolation qualitatively provides a smoother result by incorporating information from more neighboring pixels. This can be seen in its less jagged iages (e.g. on the side of the book) and slightly blurrier overall appearance compared to NN. But bilinear interpolation is also slightly more inefficient for this same reason (has to calculate and weigh more neighbors).</p>
+    </div>
 </section>
 
 <section>
