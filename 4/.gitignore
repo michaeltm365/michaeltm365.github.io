@@ -8,6 +8,6 @@ output/
 
 # assembled Gradescope submission
 build/
-proj4_submission.zip
+submission.zip
 
 .DS_Store

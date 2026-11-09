@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Project 4A: Image Warping and Mosaicing</title>
+<title>Project 4: [Auto]Stitching Photo Mosaics</title>
 <style>
     :root {
         --bg: #f7f5f2;
@@ -234,14 +234,15 @@
 <body>
 
 <header>
-    <p class="eyebrow">CS 180 &middot; Project 4A</p>
-    <h1>Image Warping<br>and Mosaicing</h1>
-    <p class="standfirst">Recovering homographies, inverse warping, rectification, and blending image mosaics.</p>
+    <p class="eyebrow">CS 180 &middot; Project 4</p>
+    <h1>[Auto]Stitching<br>Photo Mosaics</h1>
     <a class="back" href="../index.html">&larr; back to portfolio</a>
     <p class="printonly">Live version: https://michaeltm365.github.io/4/ &mdash; this PDF is a print of that page.</p>
 </header>
 
 <main>
+
+<h2 class="part"><span class="num">Part A</span>Image Warping and Mosaicing</h2>
 
 <section>
     <h2><span class="num">A.1</span>Shoot the Pictures</h2>
@@ -375,6 +376,45 @@
     <h3>8 point mosaic</h3>
     <figure class="wide"><img src="media/mosaic_a_correspondences_8pts.jpg" alt="mosaic A with 8 correspondences"><figcaption><b>Mosaic A</b> &mdash; 8 correspondences</figcaption></figure>
     <figure class="solo"><img src="media/mosaic_a_8pts.jpg" alt="mosaic A from 8 correspondences"><figcaption><b>Mosaic A</b> &mdash; 8 correspondences</figcaption></figure>
+</section>
+
+<h2 class="part"><span class="num">Part B</span>Feature Matching for Autostitching</h2>
+
+<section>
+    <h2><span class="num">B.1</span>Harris Corner Detection</h2>
+    <figure class="wide"><img src="media/mosaic_a_1_corners.jpg" alt="mosaic_a_1 Harris corners with and without ANMS"><figcaption><b>mosaic_a_1</b> &mdash; Harris corners / after ANMS</figcaption></figure>
+    <figure class="wide"><img src="media/mosaic_a_2_corners.jpg" alt="mosaic_a_2 Harris corners with and without ANMS"><figcaption><b>mosaic_a_2</b> &mdash; Harris corners / after ANMS</figcaption></figure>
+    <figure class="wide"><img src="media/mosaic_b_1_corners.jpg" alt="mosaic_b_1 Harris corners with and without ANMS"><figcaption><b>mosaic_b_1</b> &mdash; Harris corners / after ANMS</figcaption></figure>
+    <figure class="wide"><img src="media/mosaic_b_2_corners.jpg" alt="mosaic_b_2 Harris corners with and without ANMS"><figcaption><b>mosaic_b_2</b> &mdash; Harris corners / after ANMS</figcaption></figure>
+    <figure class="wide"><img src="media/mosaic_c_1_corners.jpg" alt="mosaic_c_1 Harris corners with and without ANMS"><figcaption><b>mosaic_c_1</b> &mdash; Harris corners / after ANMS</figcaption></figure>
+    <figure class="wide"><img src="media/mosaic_c_2_corners.jpg" alt="mosaic_c_2 Harris corners with and without ANMS"><figcaption><b>mosaic_c_2</b> &mdash; Harris corners / after ANMS</figcaption></figure>
+</section>
+
+<section>
+    <h2><span class="num">B.2</span>Feature Descriptor Extraction</h2>
+    <figure class="wide"><img src="media/mosaic_a_1_features.jpg" alt="mosaic_a_1 extracted features"><figcaption><b>mosaic_a_1</b> &mdash; 40&times;40 windows / normalized 8&times;8 descriptors</figcaption></figure>
+    <figure class="wide"><img src="media/mosaic_b_1_features.jpg" alt="mosaic_b_1 extracted features"><figcaption><b>mosaic_b_1</b> &mdash; 40&times;40 windows / normalized 8&times;8 descriptors</figcaption></figure>
+    <figure class="wide"><img src="media/mosaic_c_1_features.jpg" alt="mosaic_c_1 extracted features"><figcaption><b>mosaic_c_1</b> &mdash; 40&times;40 windows / normalized 8&times;8 descriptors</figcaption></figure>
+</section>
+
+<section>
+    <h2><span class="num">B.3</span>Feature Matching</h2>
+    <figure class="wide"><img src="media/mosaic_a_matches.jpg" alt="mosaic_a matched features"><figcaption><b>mosaic_a_1 / mosaic_a_2</b> &mdash; matched features</figcaption></figure>
+    <figure class="wide"><img src="media/mosaic_b_matches.jpg" alt="mosaic_b matched features"><figcaption><b>mosaic_b_1 / mosaic_b_2</b> &mdash; matched features</figcaption></figure>
+    <figure class="wide"><img src="media/mosaic_c_matches.jpg" alt="mosaic_c matched features"><figcaption><b>mosaic_c_1 / mosaic_c_2</b> &mdash; matched features</figcaption></figure>
+    <div class="quote">
+        <p>I chose the 0.5 threshold by eyeballing Figure 6b in the paper: 0.5 permits a high fraction of the correct matches while only a low fraction of the incorrect matches</p>
+    </div>
+</section>
+
+<section>
+    <h2><span class="num">B.4</span>RANSAC for Robust Homography</h2>
+    <figure class="wide"><img src="media/mosaic_a_manual_vs_auto.jpg" alt="mosaic_a manual and automatic mosaics"><figcaption><b>mosaic_a</b> &mdash; manual / automatic</figcaption></figure>
+    <figure class="wide"><img src="media/mosaic_b_manual_vs_auto.jpg" alt="mosaic_b manual and automatic mosaics"><figcaption><b>mosaic_b</b> &mdash; manual / automatic</figcaption></figure>
+    <figure class="wide"><img src="media/mosaic_c_manual_vs_auto.jpg" alt="mosaic_c manual and automatic mosaics"><figcaption><b>mosaic_c</b> &mdash; manual / automatic</figcaption></figure>
+    <div class="quote">
+        <p>I chose N=1000 iterations as an arbitrary large number, and the RANSAC threshold of 3 by searching through options of 1, 2, 3, and 5 and stopping after diminishing returns</p>
+    </div>
 </section>
 
 </main>
