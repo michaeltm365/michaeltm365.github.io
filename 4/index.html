@@ -134,6 +134,18 @@
     }
     .eq i { font-family: inherit; }
 
+    pre {
+        background: var(--panel);
+        border: 1px solid var(--rule);
+        border-radius: 8px;
+        padding: 16px 18px;
+        overflow-x: auto;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 13.5px;
+        line-height: 1.6;
+    }
+    pre code { background: none; padding: 0; font-size: inherit; }
+
     .pair {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -215,6 +227,7 @@
         section { margin-bottom: 26px; }
         h2, h3 { page-break-after: avoid; }
         .part { page-break-inside: avoid; break-inside: avoid; }
+        pre { white-space: pre-wrap; word-break: break-word; font-size: 10.5px; page-break-inside: avoid; }
         figure { box-shadow: none; page-break-inside: avoid; }
         .back { display: none; }
         .printonly {
@@ -383,6 +396,21 @@
 
 <section>
     <h2><span class="num">B.1</span>Harris Corner Detection</h2>
+    <p>Single-scale Harris corners on the 0.2&times; grayscale image, keeping local maxima of the corner strength that are above 1% of the image maximum and more than 20 pixels from the border. Adaptive non-maximal suppression then keeps the 500 points with the largest suppression radius, the distance to the nearest point that is sufficiently stronger (<i>c</i><sub>robust</sub> = 0.9).</p>
+    <div class="eq"><i>f</i>(<i>x</i>, <i>y</i>) = det <b>H</b>(<i>x</i>, <i>y</i>) / tr <b>H</b>(<i>x</i>, <i>y</i>)</div>
+    <div class="eq"><i>r<sub>i</sub></i> = min<sub><i>j</i></sub> |<b>x</b><sub><i>i</i></sub> &minus; <b>x</b><sub><i>j</i></sub>|, &nbsp;&nbsp; s.t. <i>f</i>(<b>x</b><sub><i>i</i></sub>) &lt; <i>c</i><sub>robust</sub>&thinsp;<i>f</i>(<b>x</b><sub><i>j</i></sub>)</div>
+    <pre><code>def anms(h, coords, N=500, c=0.9):
+    strengths = h[coords[0], coords[1]]
+    pts = coords.T.astype(float) # n x 2, (row, col)
+    rads = np.full(len(pts), np.inf)
+
+    for i in range(len(pts)):
+        stronger = strengths[i] &lt; c * strengths
+        if stronger.any():
+            rads[i] = np.sum((pts[stronger] - pts[i]) ** 2, axis=1).min()
+
+    # largest first
+    return coords[:, np.argsort(-rads)[:N]]</code></pre>
     <figure class="wide"><img src="media/mosaic_a_1_corners.jpg" alt="mosaic_a_1 Harris corners with and without ANMS"><figcaption><b>mosaic_a_1</b> &mdash; Harris corners / after ANMS</figcaption></figure>
     <figure class="wide"><img src="media/mosaic_a_2_corners.jpg" alt="mosaic_a_2 Harris corners with and without ANMS"><figcaption><b>mosaic_a_2</b> &mdash; Harris corners / after ANMS</figcaption></figure>
     <figure class="wide"><img src="media/mosaic_b_1_corners.jpg" alt="mosaic_b_1 Harris corners with and without ANMS"><figcaption><b>mosaic_b_1</b> &mdash; Harris corners / after ANMS</figcaption></figure>
@@ -393,6 +421,19 @@
 
 <section>
     <h2><span class="num">B.2</span>Feature Descriptor Extraction</h2>
+    <p>Each ANMS corner gets an axis-aligned descriptor at a single scale. A 40&times;40 window centered on the corner is blurred and downsampled to 8&times;8 (sample spacing <i>s</i> = 5), then bias/gain normalized to zero mean and unit variance.</p>
+    <div class="eq"><i>d</i> = (<i>p</i> &minus; &mu;<sub><i>p</i></sub>) / &sigma;<sub><i>p</i></sub></div>
+    <pre><code>def extract_features(im, coords, patch_size=8, s=5):
+    patches = []
+    window_size = patch_size * s
+    half = window_size // 2
+    for r, c in coords.T:
+        window = im[r - half : r + half, c - half : c + half]
+        window = resize(window, (patch_size, patch_size), anti_aliasing=True)
+        window = (window - np.mean(window)) / np.std(window)
+        patches.append(window)
+
+    return np.array(patches) # N x 8 x 8</code></pre>
     <figure class="wide"><img src="media/mosaic_a_1_features.jpg" alt="mosaic_a_1 extracted features"><figcaption><b>mosaic_a_1</b> &mdash; 40&times;40 windows / normalized 8&times;8 descriptors</figcaption></figure>
     <figure class="wide"><img src="media/mosaic_b_1_features.jpg" alt="mosaic_b_1 extracted features"><figcaption><b>mosaic_b_1</b> &mdash; 40&times;40 windows / normalized 8&times;8 descriptors</figcaption></figure>
     <figure class="wide"><img src="media/mosaic_c_1_features.jpg" alt="mosaic_c_1 extracted features"><figcaption><b>mosaic_c_1</b> &mdash; 40&times;40 windows / normalized 8&times;8 descriptors</figcaption></figure>
@@ -400,6 +441,23 @@
 
 <section>
     <h2><span class="num">B.3</span>Feature Matching</h2>
+    <p>Descriptors are compared by sum of squared differences. Each descriptor in image A is paired with its nearest neighbor in image B, and the pair is kept only when the ratio of the 1-NN error to the 2-NN error is below 0.5.</p>
+    <div class="eq"><i>e</i> = &Sigma;(<i>d<sub>a</sub></i> &minus; <i>d<sub>b</sub></i>)<sup>2</sup>, &nbsp;&nbsp; <i>e</i><sub>1-NN</sub> / <i>e</i><sub>2-NN</sub> &lt; 0.5</div>
+    <pre><code>def match_features(a_patches, b_patches, thresh=0.5):
+    dists = np.zeros((a_patches.shape[0], b_patches.shape[0]))
+    for i in range(a_patches.shape[0]):
+        for j in range(b_patches.shape[0]):
+            dists[i][j] = np.sum((a_patches[i] - b_patches[j]) ** 2)
+
+    nn_1s = np.argmin(dists, axis=1)
+    mod_dists = dists.copy()
+    rows = np.arange(a_patches.shape[0])
+    mod_dists[rows, nn_1s] = float(&#x27;inf&#x27;)
+    nn_2s = np.argmin(mod_dists, axis=1)
+
+    nn_ratio = dists[rows, nn_1s] / dists[rows, nn_2s]
+    keep = nn_ratio &lt; thresh # indicators
+    return np.column_stack([rows[keep], nn_1s[keep]]) # M x 2 array of (i, j)</code></pre>
     <figure class="wide"><img src="media/mosaic_a_matches.jpg" alt="mosaic_a matched features"><figcaption><b>mosaic_a_1 / mosaic_a_2</b> &mdash; matched features</figcaption></figure>
     <figure class="wide"><img src="media/mosaic_b_matches.jpg" alt="mosaic_b matched features"><figcaption><b>mosaic_b_1 / mosaic_b_2</b> &mdash; matched features</figcaption></figure>
     <figure class="wide"><img src="media/mosaic_c_matches.jpg" alt="mosaic_c matched features"><figcaption><b>mosaic_c_1 / mosaic_c_2</b> &mdash; matched features</figcaption></figure>
@@ -410,6 +468,32 @@
 
 <section>
     <h2><span class="num">B.4</span>RANSAC for Robust Homography</h2>
+    <p>Four-point RANSAC. Each of <i>N</i> = 1000 iterations samples 4 random matches, fits a homography with <code>computeH</code> from Part A, and counts the matches that reproject within 3 pixels at 0.2&times; resolution. The largest inlier set is refit with least squares, and the result goes through the Part A bilinear warp and feathered blending.</p>
+    <div class="eq">&Vert;<i>H</i><b>p</b><sub><i>i</i></sub> &minus; <b>p</b>&prime;<sub><i>i</i></sub>&Vert; &lt; &epsilon;, &nbsp;&nbsp; &epsilon; = 3</div>
+    <pre><code>def inliers(T, a_pts, b_pts, thresh):
+    # a_pts, b_pts: n x 2 arrays of (x, y)
+    p = np.column_stack([a_pts, np.ones(len(a_pts))]) @ T.T
+    p = p[:, :2] / p[:, 2:]
+    mask = np.sqrt(np.sum((p - b_pts) ** 2, axis=1)) &lt; thresh
+    return mask, mask.sum()</code></pre>
+    <pre><code>def ransac(a_pts, b_pts, thresh, N):
+    best_T = None
+    best_inlier_count = 0
+    sample_size = 4 # 4 correspondences required for homography
+    sample_range = np.arange(len(a_pts))
+    for i in range(N):
+        sample_idxs = np.random.choice(sample_range, size=sample_size, replace=False)
+        a_sample, b_sample = a_pts[sample_idxs], b_pts[sample_idxs]
+        T = computeH(a_sample, b_sample)
+        _, inlier_count = inliers(T, a_pts, b_pts, thresh)
+
+        if inlier_count &gt; best_inlier_count:
+            best_inlier_count = inlier_count
+            best_T = T
+
+    mask, _ = inliers(best_T, a_pts, b_pts, thresh)
+    final_T = computeH(a_pts[mask], b_pts[mask])
+    return final_T, mask</code></pre>
     <figure class="wide"><img src="media/mosaic_a_manual_vs_auto.jpg" alt="mosaic_a manual and automatic mosaics"><figcaption><b>mosaic_a</b> &mdash; manual / automatic</figcaption></figure>
     <figure class="wide"><img src="media/mosaic_b_manual_vs_auto.jpg" alt="mosaic_b manual and automatic mosaics"><figcaption><b>mosaic_b</b> &mdash; manual / automatic</figcaption></figure>
     <figure class="wide"><img src="media/mosaic_c_manual_vs_auto.jpg" alt="mosaic_c manual and automatic mosaics"><figcaption><b>mosaic_c</b> &mdash; manual / automatic</figcaption></figure>
